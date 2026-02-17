@@ -1,6 +1,6 @@
 {
 	"name": "n8n-nodes-gus-ceidg",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"description": "n8n community nodes for Polish business registries: GUS BIR (REGON) and CEIDG",
 	"keywords": [
 		"n8n-community-node-package",
