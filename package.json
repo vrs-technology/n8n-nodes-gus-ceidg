@@ -15,11 +15,12 @@
 	],
 	"license": "MIT",
 	"author": {
-		"name": "Piotr Sikora"
+		"name": "Piotr Sikora",
+    "email": "svirus@gmail.com"
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/vrs-technology/n8n-nodes-gus-ceidg"
+		"url": "git+https://github.com/vrs-technology/n8n-nodes-gus-ceidg.git"
 	},
 	"homepage": "https://github.com/vrs-technology/n8n-nodes-gus-ceidg#readme",
 	"bugs": {
