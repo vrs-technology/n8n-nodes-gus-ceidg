@@ -1,5 +1,6 @@
 import type {
 	IAuthenticateGeneric,
+	ICredentialTestRequest,
 	ICredentialType,
 	INodeProperties,
 } from 'n8n-workflow';
@@ -35,6 +36,14 @@ export class GatewayApi implements ICredentialType {
 			headers: {
 				'X-Api-Key': '={{$credentials.apiKey}}',
 			},
+		},
+	};
+
+	test: ICredentialTestRequest = {
+		request: {
+			baseURL: '={{$credentials.gatewayUrl}}',
+			url: '/health',
+			method: 'GET',
 		},
 	};
 }
