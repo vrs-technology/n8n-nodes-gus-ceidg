@@ -1,0 +1,55 @@
+{
+	"name": "n8n-nodes-gus-ceidg",
+	"version": "1.0.0",
+	"description": "n8n community nodes for Polish business registries: GUS BIR (REGON) and CEIDG",
+	"keywords": [
+		"n8n-community-node-package",
+		"n8n",
+		"gus",
+		"regon",
+		"bir",
+		"ceidg",
+		"poland",
+		"nip",
+		"krs"
+	],
+	"license": "MIT",
+	"author": {
+		"name": "virus"
+	},
+	"engines": {
+		"node": ">=22.0.0"
+	},
+	"main": "dist/index.js",
+	"files": [
+		"dist"
+	],
+	"n8n": {
+		"n8nNodesApiVersion": 1,
+		"credentials": [
+			"dist/credentials/GatewayApi.credentials.js"
+		],
+		"nodes": [
+			"dist/nodes/GusBir/GusBir.node.js",
+			"dist/nodes/Ceidg/Ceidg.node.js"
+		]
+	},
+	"scripts": {
+		"build": "tsc && gulp build:icons",
+		"build:watch": "tsc --watch",
+		"lint": "eslint .",
+		"lint:fix": "eslint . --fix"
+	},
+	"dependencies": {},
+	"peerDependencies": {
+		"n8n-workflow": "*"
+	},
+	"devDependencies": {
+		"@typescript-eslint/eslint-plugin": "^8.0.0",
+		"@typescript-eslint/parser": "^8.0.0",
+		"eslint": "^9.0.0",
+		"gulp": "^5.0.0",
+		"n8n-workflow": "*",
+		"typescript": "~5.7.0"
+	}
+}
