@@ -39,7 +39,7 @@ export class Ceidg implements INodeType {
 		group: ['transform'],
 		version: 1,
 		subtitle: '={{$parameter["operation"]}}',
-		description: 'Search Polish CEIDG sole proprietorship register',
+		description: 'Search Polish CEIDG register of sole proprietors and civil partnerships',
 		defaults: {
 			name: 'CEIDG',
 		},
@@ -65,6 +65,12 @@ export class Ceidg implements INodeType {
 						description: 'Search for sole proprietorships by various criteria',
 					},
 					{
+						name: 'Get Firma by ID',
+						value: 'getFirma',
+						action: 'Get detailed firma data by CEIDG ID',
+						description: 'Fetch full details of a single entry using its CEIDG UUID',
+					},
+					{
 						name: 'Get Changes',
 						value: 'getChanges',
 						action: 'Get recent changes in CEIDG',
@@ -82,7 +88,6 @@ export class Ceidg implements INodeType {
 				options: [
 					{ name: 'NIP', value: 'nip' },
 					{ name: 'REGON', value: 'regon' },
-					{ name: 'KRS', value: 'krs' },
 					{ name: 'Company Name (Nazwa)', value: 'nazwa' },
 				],
 				default: 'nip',
@@ -151,10 +156,21 @@ export class Ceidg implements INodeType {
 						name: 'page',
 						type: 'number',
 						default: 1,
-						description: 'Page number for pagination',
+						description: 'Page number for pagination (starting from 1)',
 						typeOptions: { minValue: 1 },
 					},
 				],
+			},
+
+			// --- Get Firma by ID operation ---
+			{
+				displayName: 'CEIDG ID',
+				name: 'firmaId',
+				type: 'string',
+				default: '',
+				required: true,
+				description: 'The UUID of the firma from CEIDG (e.g. from search results field "id")',
+				displayOptions: { show: { operation: ['getFirma'] } },
 			},
 
 			// --- Get Changes operation ---
@@ -219,6 +235,14 @@ export class Ceidg implements INodeType {
 						method: 'GET' as IHttpRequestMethods,
 						uri: `${gatewayUrl}/api/ceidg/search`,
 						qs,
+						json: true,
+					};
+				} else if (operation === 'getFirma') {
+					const firmaId = this.getNodeParameter('firmaId', i) as string;
+
+					requestOptions = {
+						method: 'GET' as IHttpRequestMethods,
+						uri: `${gatewayUrl}/api/ceidg/firma/${encodeURIComponent(firmaId.trim())}`,
 						json: true,
 					};
 				} else if (operation === 'getChanges') {
