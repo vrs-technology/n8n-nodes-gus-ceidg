@@ -1,6 +1,6 @@
 {
 	"name": "n8n-nodes-gus-ceidg",
-	"version": "1.0.2",
+	"version": "1.0.3",
 	"description": "n8n community nodes for Polish business registries: GUS BIR (REGON) and CEIDG",
 	"keywords": [
 		"n8n-community-node-package",
@@ -16,7 +16,7 @@
 	"license": "MIT",
 	"author": {
 		"name": "Piotr Sikora",
-    "email": "svirus@gmail.com"
+		"email": "svirus@gmail.com"
 	},
 	"repository": {
 		"type": "git",
