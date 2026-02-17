@@ -1,50 +1,51 @@
 import type {
 	IExecuteFunctions,
 	IHttpRequestMethods,
+	IHttpRequestOptions,
+	INode,
 	INodeExecutionData,
 	INodeType,
 	INodeTypeDescription,
-	IRequestOptions,
 	NodeConnectionType,
 } from 'n8n-workflow';
 import { NodeOperationError } from 'n8n-workflow';
 
 const REPORT_TYPES = [
-	{ name: 'Osoba fizyczna - dane ogólne', value: 'BIR11OsFizycznaDaneOgolne' },
-	{ name: 'Osoba fizyczna - działalność CEIDG', value: 'BIR11OsFizycznaDzialalnoscCeidg' },
-	{ name: 'Osoba fizyczna - działalność rolnicza', value: 'BIR11OsFizycznaDzialalnoscRolnicza' },
-	{ name: 'Osoba fizyczna - działalność pozostała', value: 'BIR11OsFizycznaDzialalnoscPozostala' },
-	{ name: 'Osoba fizyczna - PKD', value: 'BIR11OsFizycznaPkd' },
-	{ name: 'Osoba fizyczna - jednostki lokalne (lista)', value: 'BIR11OsFizycznaListaJednLokalnych' },
-	{ name: 'Jednostka lokalna os. fizycznej', value: 'BIR11JednLokalnaOsFizycznej' },
-	{ name: 'Jednostka lokalna os. fizycznej - PKD', value: 'BIR11JednLokalnaOsFizycznejPkd' },
-	{ name: 'Osoba prawna', value: 'BIR11OsPrawna' },
-	{ name: 'Osoba prawna - PKD', value: 'BIR11OsPrawnaPkd' },
-	{ name: 'Osoba prawna - jednostki lokalne (lista)', value: 'BIR11OsPrawnaListaJednLokalnych' },
-	{ name: 'Jednostka lokalna os. prawnej', value: 'BIR11JednLokalnaOsPrawnej' },
-	{ name: 'Jednostka lokalna os. prawnej - PKD', value: 'BIR11JednLokalnaOsPrawnejPkd' },
-	{ name: 'Spółka cywilna - wspólnicy', value: 'BIR11OsPrawnaSpCywilnaWspolnicy' },
-	{ name: 'Typ podmiotu', value: 'BIR11TypPodmiotu' },
-	{ name: 'Raport publiczny - osoba fizyczna', value: 'PublDaneRaportFizycznaOsoba' },
-	{ name: 'Raport publiczny - os. prawna', value: 'PublDaneRaportPrawna' },
-	{ name: 'Raport publiczny - działalność CEIDG', value: 'PublDaneRaportDzialalnoscFizycznejCeidg' },
-	{ name: 'Raport publiczny - działalności os. prawnej', value: 'PublDaneRaportDzialalnosciPrawnej' },
-	{ name: 'Raport publiczny - typ jednostki', value: 'PublDaneRaportTypJednostki' },
+	{ name: 'Natural Person - General Data', value: 'BIR11OsFizycznaDaneOgolne' },
+	{ name: 'Natural Person - CEIDG Activity', value: 'BIR11OsFizycznaDzialalnoscCeidg' },
+	{ name: 'Natural Person - Agricultural Activity', value: 'BIR11OsFizycznaDzialalnoscRolnicza' },
+	{ name: 'Natural Person - Other Activity', value: 'BIR11OsFizycznaDzialalnoscPozostala' },
+	{ name: 'Natural Person - PKD Codes', value: 'BIR11OsFizycznaPkd' },
+	{ name: 'Natural Person - Local Units (List)', value: 'BIR11OsFizycznaListaJednLokalnych' },
+	{ name: 'Local Unit of Natural Person', value: 'BIR11JednLokalnaOsFizycznej' },
+	{ name: 'Local Unit of Natural Person - PKD Codes', value: 'BIR11JednLokalnaOsFizycznejPkd' },
+	{ name: 'Legal Entity', value: 'BIR11OsPrawna' },
+	{ name: 'Legal Entity - PKD Codes', value: 'BIR11OsPrawnaPkd' },
+	{ name: 'Legal Entity - Local Units (List)', value: 'BIR11OsPrawnaListaJednLokalnych' },
+	{ name: 'Local Unit of Legal Entity', value: 'BIR11JednLokalnaOsPrawnej' },
+	{ name: 'Local Unit of Legal Entity - PKD Codes', value: 'BIR11JednLokalnaOsPrawnejPkd' },
+	{ name: 'Civil Partnership - Partners', value: 'BIR11OsPrawnaSpCywilnaWspolnicy' },
+	{ name: 'Entity Type', value: 'BIR11TypPodmiotu' },
+	{ name: 'Public Report - Natural Person', value: 'PublDaneRaportFizycznaOsoba' },
+	{ name: 'Public Report - Legal Entity', value: 'PublDaneRaportPrawna' },
+	{ name: 'Public Report - CEIDG Activity', value: 'PublDaneRaportDzialalnoscFizycznejCeidg' },
+	{ name: 'Public Report - Legal Entity Activity', value: 'PublDaneRaportDzialalnosciPrawnej' },
+	{ name: 'Public Report - Entity Type', value: 'PublDaneRaportTypJednostki' },
 ] as const;
 
 const SUMMARY_REPORT_TYPES = [
-	{ name: 'Nowe podmioty prawne i działalności os. fizycznych', value: 'BIR11NowePodmiotyPrawneOrazDzialalnosciOsFizycznych' },
-	{ name: 'Zaktualizowane podmioty prawne i działalności os. fizycznych', value: 'BIR11AktualizowanePodmiotyPrawneOrazDzialalnosciOsFizycznych' },
-	{ name: 'Skreślone podmioty prawne i działalności os. fizycznych', value: 'BIR11SkreslonePodmiotyPrawneOrazDzialalnosciOsFizycznych' },
-	{ name: 'Nowe jednostki lokalne', value: 'BIR11NoweJednostkiLokalne' },
-	{ name: 'Zaktualizowane jednostki lokalne', value: 'BIR11AktualizowaneJednostkiLokalne' },
-	{ name: 'Skreślone jednostki lokalne', value: 'BIR11SkresloneJednostkiLokalne' },
+	{ name: 'New Legal Entities and Natural Person Activities', value: 'BIR11NowePodmiotyPrawneOrazDzialalnosciOsFizycznych' },
+	{ name: 'Updated Legal Entities and Natural Person Activities', value: 'BIR11AktualizowanePodmiotyPrawneOrazDzialalnosciOsFizycznych' },
+	{ name: 'Removed Legal Entities and Natural Person Activities', value: 'BIR11SkreslonePodmiotyPrawneOrazDzialalnosciOsFizycznych' },
+	{ name: 'New Local Units', value: 'BIR11NoweJednostkiLokalne' },
+	{ name: 'Updated Local Units', value: 'BIR11AktualizowaneJednostkiLokalne' },
+	{ name: 'Removed Local Units', value: 'BIR11SkresloneJednostkiLokalne' },
 ] as const;
 
-function handleGatewayError(node: any, response: any, itemIndex: number): never {
-	const error = response?.error;
-	const code = error?.code || 'UNKNOWN';
-	const message = error?.message || 'Unknown gateway error';
+function handleGatewayError(node: INode, response: Record<string, unknown>, itemIndex: number): never {
+	const error = response?.error as Record<string, unknown> | undefined;
+	const code = (error?.code as string) || 'UNKNOWN';
+	const message = (error?.message as string) || 'Unknown gateway error';
 
 	if (code === 'MONTHLY_LIMIT_EXCEEDED' || code === 'RATE_LIMIT_EXCEEDED') {
 		throw new NodeOperationError(node, message, {
@@ -198,13 +199,13 @@ export class GusBir implements INodeType {
 		const returnData: INodeExecutionData[] = [];
 
 		const credentials = await this.getCredentials('gatewayApi');
-		const gatewayUrl = (credentials.gatewayUrl as string).replace(/\/$/, '');
+		const GATEWAY_URL = (credentials.gatewayUrl as string).replace(/\/$/, '');
 
 		for (let i = 0; i < items.length; i++) {
 			try {
 				const operation = this.getNodeParameter('operation', i) as string;
 				const options = this.getNodeParameter('options', i, {}) as { normalize?: boolean };
-				let requestOptions: IRequestOptions;
+				let requestOptions: IHttpRequestOptions;
 
 				if (operation === 'search') {
 					const searchBy = this.getNodeParameter('searchBy', i) as string;
@@ -212,7 +213,7 @@ export class GusBir implements INodeType {
 
 					requestOptions = {
 						method: 'POST' as IHttpRequestMethods,
-						uri: `${gatewayUrl}/api/gus/search`,
+						url: `${GATEWAY_URL}/api/gus/search`,
 						body: {
 							searchBy,
 							identifier: identifier.trim(),
@@ -226,7 +227,7 @@ export class GusBir implements INodeType {
 
 					requestOptions = {
 						method: 'POST' as IHttpRequestMethods,
-						uri: `${gatewayUrl}/api/gus/report`,
+						url: `${GATEWAY_URL}/api/gus/report`,
 						body: {
 							regon: regon.trim(),
 							reportType,
@@ -240,7 +241,7 @@ export class GusBir implements INodeType {
 
 					requestOptions = {
 						method: 'POST' as IHttpRequestMethods,
-						uri: `${gatewayUrl}/api/gus/summary`,
+						url: `${GATEWAY_URL}/api/gus/summary`,
 						body: {
 							date: date.trim(),
 							reportType,
@@ -254,7 +255,7 @@ export class GusBir implements INodeType {
 					});
 				}
 
-				const response = await this.helpers.requestWithAuthentication.call(
+				const response = await this.helpers.httpRequestWithAuthentication.call(
 					this,
 					'gatewayApi',
 					requestOptions,

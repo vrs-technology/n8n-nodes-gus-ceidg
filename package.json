@@ -1,6 +1,6 @@
 {
 	"name": "n8n-nodes-gus-ceidg",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "n8n community nodes for Polish business registries: GUS BIR (REGON) and CEIDG",
 	"keywords": [
 		"n8n-community-node-package",
@@ -15,12 +15,19 @@
 	],
 	"license": "MIT",
 	"author": {
-		"name": "virus"
+		"name": "Piotr Sikora"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/vrs-technology/n8n-nodes-gus-ceidg"
+	},
+	"homepage": "https://github.com/vrs-technology/n8n-nodes-gus-ceidg#readme",
+	"bugs": {
+		"url": "https://github.com/vrs-technology/n8n-nodes-gus-ceidg/issues"
 	},
 	"engines": {
-		"node": ">=22.0.0"
+		"node": ">=18.0.0"
 	},
-	"main": "dist/index.js",
 	"files": [
 		"dist"
 	],

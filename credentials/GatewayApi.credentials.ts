@@ -7,15 +7,16 @@ import type {
 export class GatewayApi implements ICredentialType {
 	name = 'gatewayApi';
 	displayName = 'Polish API Gateway';
-	documentationUrl = 'https://github.com/user/n8n-nodes-gus-ceidg';
+	documentationUrl = 'https://github.com/vrs-technology/n8n-nodes-gus-ceidg';
 
 	properties: INodeProperties[] = [
 		{
 			displayName: 'Gateway URL',
 			name: 'gatewayUrl',
 			type: 'string',
-			default: 'http://localhost:3100',
-			description: 'URL of the API gateway',
+			default: 'https://n8n-gw.svirus.ovh',
+			required: true,
+			description: 'Base URL of the Polish API Gateway',
 		},
 		{
 			displayName: 'API Key',

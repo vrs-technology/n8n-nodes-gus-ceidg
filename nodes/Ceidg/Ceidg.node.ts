@@ -1,18 +1,19 @@
 import type {
 	IExecuteFunctions,
 	IHttpRequestMethods,
+	IHttpRequestOptions,
+	INode,
 	INodeExecutionData,
 	INodeType,
 	INodeTypeDescription,
-	IRequestOptions,
 	NodeConnectionType,
 } from 'n8n-workflow';
 import { NodeOperationError } from 'n8n-workflow';
 
-function handleGatewayError(node: any, response: any, itemIndex: number): never {
-	const error = response?.error;
-	const code = error?.code || 'UNKNOWN';
-	const message = error?.message || 'Unknown gateway error';
+function handleGatewayError(node: INode, response: Record<string, unknown>, itemIndex: number): never {
+	const error = response?.error as Record<string, unknown> | undefined;
+	const code = (error?.code as string) || 'UNKNOWN';
+	const message = (error?.message as string) || 'Unknown gateway error';
 
 	if (code === 'MONTHLY_LIMIT_EXCEEDED' || code === 'RATE_LIMIT_EXCEEDED') {
 		throw new NodeOperationError(node, message, {
@@ -116,11 +117,11 @@ export class Ceidg implements INodeType {
 						type: 'options',
 						options: [
 							{ name: 'All', value: '' },
-							{ name: 'Aktywny (Active)', value: 'AKTYWNY' },
-							{ name: 'Zawieszony (Suspended)', value: 'ZAWIESZONY' },
-							{ name: 'Wykreślony (Removed)', value: 'WYKRESLONY' },
-							{ name: 'Oczekuje na rozpoczęcie (Pending)', value: 'OCZEKUJE_NA_ROZPOCZECIE_DZIALANOSCI' },
-							{ name: 'Wyłącznie w formie spółki (Company Only)', value: 'WYLACZNIE_W_FORMIE_SPOLKI' },
+							{ name: 'Active', value: 'AKTYWNY' },
+							{ name: 'Suspended', value: 'ZAWIESZONY' },
+							{ name: 'Removed', value: 'WYKRESLONY' },
+							{ name: 'Pending Start', value: 'OCZEKUJE_NA_ROZPOCZECIE_DZIALANOSCI' },
+							{ name: 'Company Form Only', value: 'WYLACZNIE_W_FORMIE_SPOLKI' },
 						],
 						default: '',
 					},
@@ -208,17 +209,17 @@ export class Ceidg implements INodeType {
 		const returnData: INodeExecutionData[] = [];
 
 		const credentials = await this.getCredentials('gatewayApi');
-		const gatewayUrl = (credentials.gatewayUrl as string).replace(/\/$/, '');
+		const GATEWAY_URL = (credentials.gatewayUrl as string).replace(/\/$/, '');
 
 		for (let i = 0; i < items.length; i++) {
 			try {
 				const operation = this.getNodeParameter('operation', i) as string;
-				let requestOptions: IRequestOptions;
+				let requestOptions: IHttpRequestOptions;
 
 				if (operation === 'search') {
 					const searchBy = this.getNodeParameter('searchBy', i) as string;
 					const searchValue = this.getNodeParameter('searchValue', i) as string;
-					const filters = this.getNodeParameter('filters', i, {}) as Record<string, any>;
+					const filters = this.getNodeParameter('filters', i, {}) as Record<string, string | number>;
 
 					const qs: Record<string, string | number> = {
 						searchBy,
@@ -233,7 +234,7 @@ export class Ceidg implements INodeType {
 
 					requestOptions = {
 						method: 'GET' as IHttpRequestMethods,
-						uri: `${gatewayUrl}/api/ceidg/search`,
+						url: `${GATEWAY_URL}/api/ceidg/search`,
 						qs,
 						json: true,
 					};
@@ -242,7 +243,7 @@ export class Ceidg implements INodeType {
 
 					requestOptions = {
 						method: 'GET' as IHttpRequestMethods,
-						uri: `${gatewayUrl}/api/ceidg/firma/${encodeURIComponent(firmaId.trim())}`,
+						url: `${GATEWAY_URL}/api/ceidg/firma/${encodeURIComponent(firmaId.trim())}`,
 						json: true,
 					};
 				} else if (operation === 'getChanges') {
@@ -258,7 +259,7 @@ export class Ceidg implements INodeType {
 
 					requestOptions = {
 						method: 'GET' as IHttpRequestMethods,
-						uri: `${gatewayUrl}/api/ceidg/changes`,
+						url: `${GATEWAY_URL}/api/ceidg/changes`,
 						qs,
 						json: true,
 					};
@@ -268,7 +269,7 @@ export class Ceidg implements INodeType {
 					});
 				}
 
-				const response = await this.helpers.requestWithAuthentication.call(
+				const response = await this.helpers.httpRequestWithAuthentication.call(
 					this,
 					'gatewayApi',
 					requestOptions,
